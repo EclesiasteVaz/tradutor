@@ -88,16 +88,20 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _translate() async {
-    setState(() {
-      isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
     final text = await _translateService.translate(
         _fromLanguageController.text.trim(),
         fromLanguage: languageSelectedViewmodel.fromLanguage,
         toLanguage: languageSelectedViewmodel.toLanguage);
     _toLanguageController.text = text;
-    setState(() {
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 }
