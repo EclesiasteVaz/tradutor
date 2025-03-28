@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:tradutor/core/config.dart';
 import 'package:tradutor/core/services/translate_service.dart';
 import 'package:tradutor/viewmodels/language_selected_viewmodel.dart';
 import 'package:tradutor/widgets/select_language_widget.dart';
+import 'package:flutter_tts/flutter_tts.dart' as tts;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -64,6 +66,14 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
+              IconButton(
+                onPressed: () async {
+                  if (_toLanguageController.text.isNotEmpty) {
+                    await speak(_toLanguageController.text);
+                  }
+                },
+                icon: const Icon(Icons.mic_rounded),
+              )
             ],
           ),
         ),
@@ -98,10 +108,22 @@ class _HomePageState extends State<HomePage> {
         fromLanguage: languageSelectedViewmodel.fromLanguage,
         toLanguage: languageSelectedViewmodel.toLanguage);
     _toLanguageController.text = text;
+    speak(text);
     if (mounted) {
       setState(() {
         isLoading = false;
       });
     }
+  }
+
+  Future<void> speak(String text) async {
+    final tts.FlutterTts flutterTts = tts.FlutterTts();
+
+    await flutterTts.speak(text);
+
+    await flutterTts.setLanguage(
+        languageSelectedViewmodel.toLanguage == PORTUGUESE ? "pt-BR" : "fr-FR");
+
+    await flutterTts.stop();
   }
 }
