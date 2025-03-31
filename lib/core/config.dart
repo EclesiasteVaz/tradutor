@@ -1,5 +1,1 @@
-// ignore_for_file: constant_identifier_names
-
-const PORTUGUESE = 'português';
-
-const FRANCES = 'francês';
+final languages = ['Português', 'Francês', 'Inglês', 'Alemão', 'Espanhol'];

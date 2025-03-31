@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tradutor/core/config.dart';
+import 'package:tradutor/core/services/audio_service.dart';
 import 'package:tradutor/core/services/translate_service.dart';
+import 'package:tradutor/models/translation.dart';
 import 'package:tradutor/viewmodels/language_selected_viewmodel.dart';
 import 'package:tradutor/widgets/select_language_widget.dart';
 import 'package:flutter_tts/flutter_tts.dart' as tts;
@@ -18,6 +20,8 @@ class _HomePageState extends State<HomePage> {
   final _toLanguageController = TextEditingController();
   final _translateService = TranslateService();
   bool isLoading = false;
+  final _audioService = AudioService();
+  Translation? lastTranslation;
 
   @override
   Widget build(BuildContext context) {
@@ -66,14 +70,15 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-              IconButton(
-                onPressed: () async {
-                  if (_toLanguageController.text.isNotEmpty) {
-                    await speak(_toLanguageController.text);
-                  }
-                },
-                icon: const Icon(Icons.mic_rounded),
-              )
+              if (lastTranslation != null && !isLoading)
+                IconButton(
+                  onPressed: () async {
+                    if (_toLanguageController.text.isNotEmpty) {
+                      await speak(lastTranslation!);
+                    }
+                  },
+                  icon: const Icon(Icons.mic_rounded),
+                )
             ],
           ),
         ),
@@ -98,32 +103,27 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _translate() async {
-    if (mounted) {
-      setState(() {
-        isLoading = true;
-      });
-    }
-    final text = await _translateService.translate(
+    setState(() {
+      isLoading = true;
+    });
+
+    final translation = await _translateService.translate(
         _fromLanguageController.text.trim(),
         fromLanguage: languageSelectedViewmodel.fromLanguage,
         toLanguage: languageSelectedViewmodel.toLanguage);
-    _toLanguageController.text = text;
-    speak(text);
+    if (translation != null) {
+      _toLanguageController.text = translation.text;
+      speak(translation);
+    }
     if (mounted) {
       setState(() {
         isLoading = false;
+        lastTranslation = translation;
       });
     }
   }
 
-  Future<void> speak(String text) async {
-    final tts.FlutterTts flutterTts = tts.FlutterTts();
-
-    await flutterTts.speak(text);
-
-    await flutterTts.setLanguage(
-        languageSelectedViewmodel.toLanguage == PORTUGUESE ? "pt-BR" : "fr-FR");
-
-    await flutterTts.stop();
+  Future<void> speak(Translation translation) async {
+    return _audioService.play(translation);
   }
 }
