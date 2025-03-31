@@ -2,11 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
+import 'package:tradutor/core/config.dart';
 import 'package:tradutor/models/translation.dart';
 
 class TranslateService {
   TranslateService() {
-    Gemini.init(apiKey: "YOUR-API-KEY");
+    Gemini.init(apiKey: API_KEY);
   }
 
   Future<Translation?> translate(
